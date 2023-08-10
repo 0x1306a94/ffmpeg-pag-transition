@@ -1,3 +1,8 @@
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "framesync.h"
 #include "internal.h"
 #include "libavutil/opt.h"
@@ -32,11 +37,12 @@ typedef struct {
 #define OFFSET(x) offsetof(PAGTransitionContext, x)
 #define FLAGS AV_OPT_FLAG_FILTERING_PARAM | AV_OPT_FLAG_VIDEO_PARAM
 
-static const AVOption gltransition_options[] = {
+static const AVOption pagtransition_options[] = {
     {"duration", "transition duration in seconds", OFFSET(duration), AV_OPT_TYPE_DOUBLE, {.dbl = 1.0}, 0, DBL_MAX, FLAGS},
     {"offset", "delay before startingtransition in seconds", OFFSET(offset), AV_OPT_TYPE_DOUBLE, {.dbl = 0.0}, 0, DBL_MAX, FLAGS},
     {"source", "path to the pag-transition source file (defaults to basic fade)", OFFSET(source), AV_OPT_TYPE_STRING, {.str = NULL}, CHAR_MIN, CHAR_MAX, FLAGS},
-    {NULL}};
+    {NULL},
+};
 
 FRAMESYNC_DEFINE_CLASS(pagtransition, PAGTransitionContext, fs);
 
@@ -199,16 +205,20 @@ static const AVFilterPad pagtransition_outputs[] = {
 };
 
 AVFilter ff_vf_pagtransition = {
-    .name          = "pagtransition",
-    .description   = NULL_IF_CONFIG_SMALL("libpag blend transitions"),
-    .priv_size     = sizeof(PAGTransitionContext),
-    .preinit       = pagtransition_framesync_preinit,
-    .init          = init,
-    .uninit        = uninit,
-    .query_formats = query_formats,
-    .activate      = activate,
-    .inputs        = pagtransition_inputs,
-    .outputs       = pagtransition_outputs,
-    .priv_class    = &pagtransition_class,
-    .flags         = AVFILTER_FLAG_SUPPORT_TIMELINE_GENERIC,
+    .name        = "pagtransition",
+    .description = NULL_IF_CONFIG_SMALL("libpag blend transitions"),
+    .priv_size   = sizeof(PAGTransitionContext),
+    .preinit     = pagtransition_framesync_preinit,
+    .init        = init,
+    .uninit      = uninit,
+    FILTER_INPUTS(pagtransition_inputs),
+    FILTER_OUTPUTS(pagtransition_outputs),
+    FILTER_QUERY_FUNC(query_formats),
+    .activate   = activate,
+    .priv_class = &pagtransition_class,
+    .flags      = AVFILTER_FLAG_SUPPORT_TIMELINE_GENERIC,
 };
+
+#ifdef __cplusplus
+}
+#endif

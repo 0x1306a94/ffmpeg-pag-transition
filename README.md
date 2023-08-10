@@ -1,5 +1,6 @@
 # ffmpeg-pag-transition
 
+* 基于ffmpeg-5.1.3
 * 源码增加以下内容
 ```bash
 # libavfilter/Makefile

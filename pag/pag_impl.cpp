@@ -2,6 +2,8 @@
 #include <pag/file.h>
 #include <pag/pag.h>
 
+#include "./pag_impl.h"
+
 struct PagContext {
 	std::shared_ptr<pag::PAGFile> file;
 	std::shared_ptr<pag::PAGImage> from;

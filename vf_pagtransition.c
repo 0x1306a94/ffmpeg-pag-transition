@@ -45,27 +45,6 @@ static const AVOption pagtransition_options[] = {
 
 FRAMESYNC_DEFINE_CLASS(pagtransition, PAGTransitionContext, fs);
 
-// static int pagtransition_framesync_preinit(AVFilterContext *ctx) {
-// 	PAGTransitionContext *s = static_cast<PAGTransitionContext *>(ctx->priv);
-// 	ff_framesync_preinit(&s->fs);
-// 	return 0;
-// }
-
-// static void *pagtransition_child_next(void *obj, void *prev) {
-// 	PAGTransitionContext *s = static_cast<PAGTransitionContext *>(obj);
-// 	return prev ? __null : &s->fs;
-// }
-
-// static const AVClass pagtransition_class = {
-//     .class_name          = "pagtransition",
-//     .item_name           = av_default_item_name,
-//     .option              = pagtransition_options,
-//     .version             = ((58) << 16 | (2) << 8 | (100)),
-//     .category            = AV_CLASS_CATEGORY_FILTER,
-//     .child_class_iterate = ff_framesync_child_class_iterate,
-//     .child_next          = pagtransition_child_next,
-// }
-
 static const enum AVPixelFormat alpha_pix_fmts[] = {
     AV_PIX_FMT_ARGB,
     AV_PIX_FMT_ABGR,

@@ -1,8 +1,3 @@
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "framesync.h"
 #include "internal.h"
 #include "libavutil/opt.h"
@@ -14,10 +9,14 @@ extern "C" {
 #define FROM (0)
 #define TO (1)
 
-#define PIXEL_FORMAT (GL_RGB)
+extern void *pag_context_create(const char *path);
+extern void pag_context_destory(void *ctx);
+extern bool pag_context_fill_from(void *ctx);
+extern bool pag_context_fill_to(void *ctx);
 
 typedef struct {
 	const AVClass *class;
+	void *pctx;
 	FFFrameSync fs;
 
 	// input options
@@ -46,6 +45,27 @@ static const AVOption pagtransition_options[] = {
 
 FRAMESYNC_DEFINE_CLASS(pagtransition, PAGTransitionContext, fs);
 
+// static int pagtransition_framesync_preinit(AVFilterContext *ctx) {
+// 	PAGTransitionContext *s = static_cast<PAGTransitionContext *>(ctx->priv);
+// 	ff_framesync_preinit(&s->fs);
+// 	return 0;
+// }
+
+// static void *pagtransition_child_next(void *obj, void *prev) {
+// 	PAGTransitionContext *s = static_cast<PAGTransitionContext *>(obj);
+// 	return prev ? __null : &s->fs;
+// }
+
+// static const AVClass pagtransition_class = {
+//     .class_name          = "pagtransition",
+//     .item_name           = av_default_item_name,
+//     .option              = pagtransition_options,
+//     .version             = ((58) << 16 | (2) << 8 | (100)),
+//     .category            = AV_CLASS_CATEGORY_FILTER,
+//     .child_class_iterate = ff_framesync_child_class_iterate,
+//     .child_next          = pagtransition_child_next,
+// }
+
 static const enum AVPixelFormat alpha_pix_fmts[] = {
     AV_PIX_FMT_ARGB,
     AV_PIX_FMT_ABGR,
@@ -56,8 +76,13 @@ static const enum AVPixelFormat alpha_pix_fmts[] = {
 
 static int setup_pag(AVFilterLink *inLink) {
 	AVFilterContext *ctx    = inLink->dst;
-	PAGTransitionContext *c = ctx->priv;
-
+	PAGTransitionContext *c = static_cast<PAGTransitionContext *>(ctx->priv);
+	if (c->pctx != NULL) {
+		pag_context_destory(c->pctx);
+	}
+	if (c->source != NULL) {
+		c->pctx = pag_context_create(c->source);
+	}
 	return 0;
 }
 
@@ -65,7 +90,7 @@ static AVFrame *apply_transition(FFFrameSync *fs,
                                  AVFilterContext *ctx,
                                  AVFrame *fromFrame,
                                  const AVFrame *toFrame) {
-	PAGTransitionContext *c = ctx->priv;
+	PAGTransitionContext *c = static_cast<PAGTransitionContext *>(ctx->priv);
 	AVFilterLink *fromLink  = ctx->inputs[FROM];
 	AVFilterLink *toLink    = ctx->inputs[TO];
 	AVFilterLink *outLink   = ctx->outputs[0];
@@ -86,7 +111,7 @@ static AVFrame *apply_transition(FFFrameSync *fs,
 
 static int blend_frame(FFFrameSync *fs) {
 	AVFilterContext *ctx    = fs->parent;
-	PAGTransitionContext *c = ctx->priv;
+	PAGTransitionContext *c = static_cast<PAGTransitionContext *>(ctx->priv);
 
 	AVFrame *fromFrame, *toFrame, *outFrame;
 	int ret;
@@ -113,7 +138,7 @@ static int blend_frame(FFFrameSync *fs) {
 }
 
 static av_cold int init(AVFilterContext *ctx) {
-	PAGTransitionContext *c = ctx->priv;
+	PAGTransitionContext *c = static_cast<PAGTransitionContext *>(ctx->priv);
 	c->fs.on_event          = blend_frame;
 	c->first_pts            = AV_NOPTS_VALUE;
 
@@ -121,8 +146,13 @@ static av_cold int init(AVFilterContext *ctx) {
 }
 
 static av_cold void uninit(AVFilterContext *ctx) {
-	PAGTransitionContext *c = ctx->priv;
+	PAGTransitionContext *c = static_cast<PAGTransitionContext *>(ctx->priv);
 	ff_framesync_uninit(&c->fs);
+
+	if (c->pctx != NULL) {
+		pag_context_destory(c->pctx);
+		c->pctx = NULL;
+	}
 }
 
 static int query_formats(AVFilterContext *ctx) {
@@ -137,7 +167,7 @@ static int query_formats(AVFilterContext *ctx) {
 	};
 	AVFilterFormats *fmts_list;
 
-	fmts_list = ff_make_format_list(pix_fmts);
+	fmts_list = ff_make_format_list((const int *)pix_fmts);
 	if (!fmts_list) {
 		return AVERROR(ENOMEM);
 	}
@@ -145,13 +175,13 @@ static int query_formats(AVFilterContext *ctx) {
 }
 
 static int activate(AVFilterContext *ctx) {
-	PAGTransitionContext *c = ctx->priv;
+	PAGTransitionContext *c = static_cast<PAGTransitionContext *>(ctx->priv);
 	return ff_framesync_activate(&c->fs);
 }
 
 static int config_output(AVFilterLink *outLink) {
 	AVFilterContext *ctx    = outLink->src;
-	PAGTransitionContext *c = ctx->priv;
+	PAGTransitionContext *c = static_cast<PAGTransitionContext *>(ctx->priv);
 	AVFilterLink *fromLink  = ctx->inputs[FROM];
 	AVFilterLink *toLink    = ctx->inputs[TO];
 	int ret;
@@ -218,7 +248,3 @@ AVFilter ff_vf_pagtransition = {
     .priv_class = &pagtransition_class,
     .flags      = AVFILTER_FLAG_SUPPORT_TIMELINE_GENERIC,
 };
-
-#ifdef __cplusplus
-}
-#endif

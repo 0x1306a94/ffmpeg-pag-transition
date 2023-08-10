@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 extern void *pag_context_create(const char *path);

@@ -1,0 +1,34 @@
+diff --git a/libavfilter/Makefile b/libavfilter/Makefile
+index 30cc329fb6..e3776d2ab5 100644
+--- a/libavfilter/Makefile
++++ b/libavfilter/Makefile
+@@ -181,6 +181,8 @@ OBJS-$(CONFIG_SINE_FILTER)                   += asrc_sine.o
+ OBJS-$(CONFIG_ANULLSINK_FILTER)              += asink_anullsink.o
+ 
+ # video filters
++OBJS-$(CONFIG_PAGTRANSITION_FILTER)          += pag/pag_impl.o vf_pagtransition.o
++
+ OBJS-$(CONFIG_ADDROI_FILTER)                 += vf_addroi.o
+ OBJS-$(CONFIG_ALPHAEXTRACT_FILTER)           += vf_extractplanes.o
+ OBJS-$(CONFIG_ALPHAMERGE_FILTER)             += vf_alphamerge.o framesync.o
+@@ -550,6 +552,7 @@ OBJS-$(CONFIG_ZMQ_FILTER)                    += f_zmq.o
+ OBJS-$(CONFIG_ZOOMPAN_FILTER)                += vf_zoompan.o
+ OBJS-$(CONFIG_ZSCALE_FILTER)                 += vf_zscale.o
+ 
++
+ OBJS-$(CONFIG_ALLRGB_FILTER)                 += vsrc_testsrc.o
+ OBJS-$(CONFIG_ALLYUV_FILTER)                 += vsrc_testsrc.o
+ OBJS-$(CONFIG_CELLAUTO_FILTER)               += vsrc_cellauto.o
+diff --git a/libavfilter/allfilters.c b/libavfilter/allfilters.c
+index 5ebacfde27..7938f2c3be 100644
+--- a/libavfilter/allfilters.c
++++ b/libavfilter/allfilters.c
+@@ -578,6 +578,8 @@ extern  const AVFilter ff_vsink_buffer;
+ extern const AVFilter ff_af_afifo;
+ extern const AVFilter ff_vf_fifo;
+ 
++extern const AVFilter ff_vf_pagtransition;
++
+ #include "libavfilter/filter_list.c"
+ 
+ 

@@ -2,17 +2,14 @@
 #include "internal.h"
 #include "libavutil/opt.h"
 
+#include "./pag/pag_impl.h"
+
 #include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #define FROM (0)
 #define TO (1)
-
-extern void *pag_context_create(const char *path);
-extern void pag_context_destory(void *ctx);
-extern bool pag_context_fill_from(void *ctx);
-extern bool pag_context_fill_to(void *ctx);
 
 typedef struct {
 	const AVClass *class;

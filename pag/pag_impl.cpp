@@ -15,7 +15,12 @@ extern "C" {
 #endif
 
 void *pag_context_create(const char *path) {
+	auto pagFile = pag::PAGFile::Load(path);
+	if (pagFile == nullptr) {
+		return nullptr;
+	}
 	PagContext *ctx = new PagContext();
+	ctx->file       = std::move(pagFile);
 	return static_cast<void *>(ctx);
 }
 

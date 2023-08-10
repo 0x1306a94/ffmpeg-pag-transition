@@ -52,7 +52,7 @@ static const enum AVPixelFormat alpha_pix_fmts[] = {
 
 static int setup_pag(AVFilterLink *inLink) {
 	AVFilterContext *ctx    = inLink->dst;
-	PAGTransitionContext *c = static_cast<PAGTransitionContext *>(ctx->priv);
+	PAGTransitionContext *c = (PAGTransitionContext *)(ctx->priv);
 	if (c->pctx != NULL) {
 		pag_context_destory(c->pctx);
 	}
@@ -66,7 +66,7 @@ static AVFrame *apply_transition(FFFrameSync *fs,
                                  AVFilterContext *ctx,
                                  AVFrame *fromFrame,
                                  const AVFrame *toFrame) {
-	PAGTransitionContext *c = static_cast<PAGTransitionContext *>(ctx->priv);
+	PAGTransitionContext *c = (PAGTransitionContext *)(ctx->priv);
 	AVFilterLink *fromLink  = ctx->inputs[FROM];
 	AVFilterLink *toLink    = ctx->inputs[TO];
 	AVFilterLink *outLink   = ctx->outputs[0];
@@ -87,7 +87,7 @@ static AVFrame *apply_transition(FFFrameSync *fs,
 
 static int blend_frame(FFFrameSync *fs) {
 	AVFilterContext *ctx    = fs->parent;
-	PAGTransitionContext *c = static_cast<PAGTransitionContext *>(ctx->priv);
+	PAGTransitionContext *c = (PAGTransitionContext *)(ctx->priv);
 
 	AVFrame *fromFrame, *toFrame, *outFrame;
 	int ret;
@@ -114,7 +114,7 @@ static int blend_frame(FFFrameSync *fs) {
 }
 
 static av_cold int init(AVFilterContext *ctx) {
-	PAGTransitionContext *c = static_cast<PAGTransitionContext *>(ctx->priv);
+	PAGTransitionContext *c = (PAGTransitionContext *)(ctx->priv);
 	c->fs.on_event          = blend_frame;
 	c->first_pts            = AV_NOPTS_VALUE;
 
@@ -122,7 +122,7 @@ static av_cold int init(AVFilterContext *ctx) {
 }
 
 static av_cold void uninit(AVFilterContext *ctx) {
-	PAGTransitionContext *c = static_cast<PAGTransitionContext *>(ctx->priv);
+	PAGTransitionContext *c = (PAGTransitionContext *)(ctx->priv);
 	ff_framesync_uninit(&c->fs);
 
 	if (c->pctx != NULL) {
@@ -151,13 +151,13 @@ static int query_formats(AVFilterContext *ctx) {
 }
 
 static int activate(AVFilterContext *ctx) {
-	PAGTransitionContext *c = static_cast<PAGTransitionContext *>(ctx->priv);
+	PAGTransitionContext *c = (PAGTransitionContext *)(ctx->priv);
 	return ff_framesync_activate(&c->fs);
 }
 
 static int config_output(AVFilterLink *outLink) {
 	AVFilterContext *ctx    = outLink->src;
-	PAGTransitionContext *c = static_cast<PAGTransitionContext *>(ctx->priv);
+	PAGTransitionContext *c = (PAGTransitionContext *)(ctx->priv);
 	AVFilterLink *fromLink  = ctx->inputs[FROM];
 	AVFilterLink *toLink    = ctx->inputs[TO];
 	int ret;

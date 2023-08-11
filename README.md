@@ -27,3 +27,7 @@ ffmpeg -i /Users/king/Downloads/v0200fg10000cfes7crc77u9c9u9d1b0.MP4 \
 -movflags faststart -y out.mp4
 ```
 * 制作pag特效文件时需要注意, 滤镜内使用0号可编辑图片图层为from, 1号可编辑图片图层为to.
+
+<video width="640" height="360" controls>
+    <source src="https://github.com/0x1306a94/ffmpeg-pag-transition/releases/download/temp_file/out.mp4" type="video/mp4">
+</video>

@@ -18,7 +18,7 @@ typedef enum {
 extern void *pag_context_create(const char *path);
 extern void pag_context_destory(void *ctx);
 extern bool pag_context_fill_image(void *ctx, const void *pixels, int width, int height, PAG_Support_Pix_FMT fmt, bool is_from);
-extern bool pag_context_renderer(void *ctx, float progress, PAG_Support_Pix_FMT fmt, uint8_t *out_data);
+extern bool pag_context_renderer(void *ctx, bool swap, float progress, PAG_Support_Pix_FMT fmt, uint8_t *out_data);
 
 #ifdef __cplusplus
 }

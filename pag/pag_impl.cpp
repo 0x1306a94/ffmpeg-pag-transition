@@ -100,7 +100,7 @@ bool pag_context_fill_image(void *ctx, const void *pixels, int width, int height
     return true;
 }
 
-bool pag_context_renderer(void *ctx, float progress, PAG_Support_Pix_FMT fmt, uint8_t *out_data) {
+bool pag_context_renderer(void *ctx, bool swap, float progress, PAG_Support_Pix_FMT fmt, uint8_t *out_data) {
     if (ctx == nullptr || out_data == nullptr) {
         return false;
     }
@@ -113,8 +113,13 @@ bool pag_context_renderer(void *ctx, float progress, PAG_Support_Pix_FMT fmt, ui
         return false;
     }
 
-    pctx->file->replaceImage(0, pctx->from);
-    pctx->file->replaceImage(1, pctx->to);
+    if (swap) {
+        pctx->file->replaceImage(0, pctx->to);
+        pctx->file->replaceImage(1, pctx->from);
+    } else {
+        pctx->file->replaceImage(0, pctx->from);
+        pctx->file->replaceImage(1, pctx->to);
+    }
 
     pctx->player->setProgress(progress);
     if (!pctx->player->flush()) {

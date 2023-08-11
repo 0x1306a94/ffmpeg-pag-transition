@@ -20,6 +20,7 @@ typedef struct {
     // input options
     double duration;
     double offset;
+    bool swap;
     char *source;
 
     PAG_Support_Pix_FMT pix_fmt;
@@ -36,7 +37,9 @@ typedef struct {
 static const AVOption pagtransition_options[] = {
     {"duration", "transition duration in seconds", OFFSET(duration), AV_OPT_TYPE_DOUBLE, {.dbl = 1.0}, 0, DBL_MAX, FLAGS},
     {"offset", "delay before startingtransition in seconds", OFFSET(offset), AV_OPT_TYPE_DOUBLE, {.dbl = 0.0}, 0, DBL_MAX, FLAGS},
+    {"swap", "swap from and to in renderering", OFFSET(swap), AV_OPT_TYPE_BOOL, {.i64 = 0}, INT_MIN, INT_MAX, FLAGS},
     {"source", "path to the pag-transition source file (defaults to basic fade)", OFFSET(source), AV_OPT_TYPE_STRING, {.str = NULL}, CHAR_MIN, CHAR_MAX, FLAGS},
+
     {NULL},
 };
 
@@ -105,10 +108,10 @@ static AVFrame *apply_transition(FFFrameSync *fs,
 
     av_frame_copy_props(outFrame, fromFrame);
 
-    if (fs->pts < c->first_pts) {
-        av_frame_copy(outFrame, fromFrame);
-        return outFrame;
-    }
+    // if (fs->pts < c->first_pts) {
+    //     av_frame_copy(outFrame, fromFrame);
+    //     return outFrame;
+    // }
 
     const float ts = ((fs->pts - c->first_pts) / (float)fs->time_base.den) - c->offset;
     const float progress = FFMAX(0.0f, FFMIN(1.0f, ts / c->duration));
@@ -120,7 +123,7 @@ static AVFrame *apply_transition(FFFrameSync *fs,
 
     av_log(c, AV_LOG_DEBUG, "fromFrame pix_fmt %s size %dx%d\n", av_get_pix_fmt_name(fromFrame->format), fromFrame->width, fromFrame->height);
     av_log(c, AV_LOG_DEBUG, "toFrame pix_fmt %s size %dx%d\n", av_get_pix_fmt_name(toFrame->format), toFrame->width, toFrame->height);
-    av_log(c, AV_LOG_DEBUG, "outFrame pix_fmt %s size %dx%d\n", av_get_pix_fmt_name(outFrame->format), outFrame->width, outFrame->height);
+    av_log(c, AV_LOG_DEBUG, "outFrame pix_fmt %s size %dx%d swap %d\n", av_get_pix_fmt_name(outFrame->format), outFrame->width, outFrame->height, c->swap);
 
     if (!pag_context_fill_image(c->pctx, (const void *)fromFrame->data[0], fromLink->w, fromLink->h, c->pix_fmt, true)) {
         av_log(c, AV_LOG_ERROR, "fill fromFrame to pag image fail\n");
@@ -136,7 +139,7 @@ static AVFrame *apply_transition(FFFrameSync *fs,
         return NULL;
     }
 
-    if (!pag_context_renderer(c->pctx, progress, c->pix_fmt, (uint8_t *)outFrame->data[0])) {
+    if (!pag_context_renderer(c->pctx, c->swap, progress, c->pix_fmt, (uint8_t *)outFrame->data[0])) {
         av_log(c, AV_LOG_ERROR, "pag renderer fail\n");
         av_frame_free(&fromFrame);
         av_frame_free(&outFrame);

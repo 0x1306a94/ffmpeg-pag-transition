@@ -71,9 +71,9 @@ echo "ARCH: $ARCH"
 echo "LDFLAGS: $LDFLAGS"
 echo "CFLAGS: $CFLAGS"
 
-if [[ -f "config.h" ]]; then
-    rm config.h
-fi
+# if [[ -f "config.h" ]]; then
+#     rm config.h
+# fi
 
 # exit 0
 
@@ -82,6 +82,8 @@ fi
 # export CC=`xcrun --sdk macosx --find clang`
 # export CXX=`xcrun --sdk macosx --find clang++`
 
+function gen_config() {
+echo "configure ...."
 ./configure --prefix=$INSTALL_FFMPEG_DIR \
 --enable-cross-compile \
 --arch=$ARCH \
@@ -115,8 +117,22 @@ fi
 # --extra-libs="-L$LIBPAG_BUILD_DIR/pag/mac/x64 -lpag -liconv -lc++ -lcompression" \
 # --extra-libs="-framework ApplicationServices -framework AGL -framework OpenGL -framework QuartzCore -framework Cocoa -framework Foundation -framework VideoToolbox -framework CoreMedia"
 # --extra-cflags="-isysroot $MACOS_SDK -std=c++11"
+  if [[ $? != 0 ]]; then
+    exit $?
+  fi
+}
 
+if [[ "$1" != "-b" ]]; then
+    gen_config
+fi
 
 make install
+
+if [[ "$(uname)"=="Darwin" ]]; then
+  echo "add_rpath ..."
+  install_name_tool -add_rpath $LIBPAG_BUILD_DIR/pag/mac/x64 $INSTALL_FFMPEG_DIR/bin/ffmpeg
+  install_name_tool -add_rpath $LIBPAG_BUILD_DIR/pag/mac/x64 $INSTALL_FFMPEG_DIR/bin/ffplay
+  install_name_tool -add_rpath $LIBPAG_BUILD_DIR/pag/mac/x64 $INSTALL_FFMPEG_DIR/bin/ffprobe
+fi
 
 cd $CURRENT_SOURCE_DIR

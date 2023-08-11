@@ -1,5 +1,7 @@
 # ffmpeg-pag-transition
 
+* 自定义ffmpeg转场滤镜,使用[Tencent/libpag](https://github.com/Tencent/libpag)渲染
+* 参考自[transitive-bullshit/ffmpeg-gl-transition](https://github.com/transitive-bullshit/ffmpeg-gl-transition)
 * 基于ffmpeg-5.1.3
 * 源码增加以下内容
 ```bash
